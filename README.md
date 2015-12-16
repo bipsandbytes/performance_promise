@@ -82,7 +82,7 @@ Visiting `/articles` now will throw an exception. The exception tells you that t
 
 Update the annotation:
 ```ruby
-  Performance 1.query + Article.count.queries
+  Performance 1.query + n(Article).queries
   def index
     @articles = Article.all
     @total_comments = 0

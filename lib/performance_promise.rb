@@ -159,6 +159,13 @@ module PerformancePromise
   end
 end
 
+
+def n(model)
+  return 1 unless PerformancePromise.configuration.allowed_environments.include?(Rails.env)
+  model.count
+end
+
+
 class Fixnum
   def queries
     self
