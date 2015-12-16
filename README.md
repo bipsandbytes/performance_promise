@@ -120,4 +120,29 @@ A `Speedy` action is supposed to be well behaved, making lesser than `x` databas
 #### `untagged_methods_are_speedy: bool`
 By default, actions that are not annotated aren't validated by `performance_promise`. If you'd like to force all actions to be validated, one option is to simply default them all to be `Speedy`. This allows developers to make _no_ change to their code, while still reaping the benefits of performance validation. Iff a view fails to be `Speedy`, then the developer is forced to acknowledge it in code.
 
+
+## FAQ
+> What is the strange syntax? Is it a function call? Is it a method?
+
+We borrow the coding style from Python's `decorators`. This style allows for a function to be wrapped by another. This is a great use case for that style since it allows for us to express the annotation right above the function definition.
+
+Credit goes to [Yehuda Katz][yehuda-katz] for the [port of decortators][ruby-decorators] into Ruby.
+
+> Will this affect my production service?
+
+By default, `performace_promise` is applied only in `development` and `test` environments. You can choose to override this, but is strongly discouraged.
+
+>  Is this the same as [Bullet][bullet] gem?
+
+[Bullet][bullet] is a great piece of software that allows developers to help identify N + 1 queries and unused eager loading. It does this by watching your application in development mode, and alerting you when it does either of those things.
+
+`performance_promise` can be tuned to not only identify N + 1 queries, but can also alert whenever there's _any_ change in performance.  It allows you to identify expensive actions irrespective of their database query profile.
+
+`performance_promise` also has access to the entire database query object. In the future, `performance_promise` can be tuned to perform additonal checks like how long the most expensive query took, whether the action performed any table scans (available through an `EXPLAIN`) etc.
+
+Finally, the difference between `bullet` and `performance_promise` is akin to testing by refreshing your browser and testing by writing specs. `performance_promise` encourages you to specify your action's performance by declaring it in code itself. This allows both  code-reviewers as well as automated tests to verify your code's performance.
+
 [rails-getting-started]: <http://guides.rubyonrails.org/getting_started.html>
+[bullet]: <https://github.com/flyerhzm/bullet>
+[yehuda-katz]: <http://yehudakatz.com/>
+[ruby-decorators]: <http://yehudakatz.com/2009/07/11/python-decorators-in-ruby/>
