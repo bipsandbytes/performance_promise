@@ -59,14 +59,18 @@ Assuming your routes and views are setup, you should be able to succesfully visi
 
 You can annotate this action with a promise of how many database queries the action will make so:
 ```ruby
+class ArticlesController < ApplicationController
+
   Performance 1.query
   def index
     @articles = Article.all
   end
+
+end
 ```
 Visit `/articles` to confirm that the view is rendered successfully again.
 
-Now suppose, you make the view more complex
+Now suppose, you make the view more complex, causing it to execute more database queries
 ```ruby
   Performance 1.query
   def index
@@ -78,9 +82,9 @@ Now suppose, you make the view more complex
     puts @total_comments
   end
 ```
-Visiting `/articles` now will throw an exception. The exception tells you that the performance of your view does not respect the annotation promise.
+Since the performance annotation has not been updated, visiting `/articles` now will throw an exception. The exception tells you that the performance of your view does not respect the annotation promise.
 
-Update the annotation:
+Let's update the annotation:
 ```ruby
   Performance 1.query + n(Article).queries
   def index
