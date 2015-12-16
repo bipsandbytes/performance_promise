@@ -84,6 +84,8 @@ Now suppose, you make the view more complex, causing it to execute more database
 ```
 Since the performance annotation has not been updated, visiting `/articles` now will throw an exception. The exception tells you that the performance of your view does not respect the annotation promise.
 
+![alt tag](http://i.imgur.com/wOIlKIa.png)
+
 Let's update the annotation:
 ```ruby
   Performance 1.query + n(Article).queries
