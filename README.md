@@ -125,17 +125,18 @@ By default, actions that are not annotated aren't validated by `performance_prom
 
 
 ## FAQ
-> What is the strange syntax? Is it a function call? Is it a method?
+> **What is the strange syntax? Is it a function call? Is it a method?**
 
 We borrow the coding style from Python's `decorators`. This style allows for a function to be wrapped by another. This is a great use case for that style since it allows for us to express the annotation right above the function definition.
 
 Credit goes to [Yehuda Katz][yehuda-katz] for the [port of decortators][ruby-decorators] into Ruby.
 
-> Will this affect my production service?
+> **Will this affect my production service?**
 
 By default, `performace_promise` is applied only in `development` and `test` environments. You can choose to override this, but is strongly discouraged.
 
-> What are some other kinds of performance guarantees that I can make with `performance_promise`?
+
+> **What are some other kinds of performance guarantees that I can make with `performance_promise`?**
 
 In addition to promises about the number of database queries, you can also make promises on how long the entire view will take to render.
 ```ruby
@@ -146,7 +147,7 @@ In addition to promises about the number of database queries, you can also make 
   end
 ```
 
->  Is this the same as [Bullet][bullet] gem?
+> **Is this the same as [Bullet][bullet] gem?**
 
 [Bullet][bullet] is a great piece of software that allows developers to help identify N + 1 queries and unused eager loading. It does this by watching your application in development mode, and alerting you when it does either of those things.
 
