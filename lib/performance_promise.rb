@@ -25,14 +25,15 @@ module PerformancePromise
 
     ActiveSupport::Notifications.subscribe "process_action.action_controller" do |name, start, finish, id, payload|
       db_queries = SQLRecorder.instance.flush
+      render_time = finish - start
       method_name = "#{payload[:controller]}\##{payload[:action]}"
       promised = PerformancePromise.promises[method_name]
       if promised
-        PerformancePromise::validate_promise(method_name, db_queries, promised)
+        PerformancePromise::validate_promise(method_name, db_queries, render_time, promised)
       elsif PerformancePromise.configuration.untagged_methods_are_speedy
         PerformancePromise.configuration.logger.warn 'No promises made. Assuming Speedy'
         promised = PerformancePromise.configuration.speedy_promise
-        PerformancePromise::validate_promise(method_name, db_queries, promised)
+        PerformancePromise::validate_promise(method_name, db_queries, render_time, promised)
       end
     end
   end
@@ -44,6 +45,7 @@ module PerformancePromise
     attr_accessor :speedy_promise
     attr_accessor :untagged_methods_are_speedy
     attr_accessor :validate_number_of_queries
+    attr_accessor :validate_time_taken_for_render
     attr_accessor :throw_exception
 
     def initialize
@@ -56,9 +58,11 @@ module PerformancePromise
       ]
       @untagged_methods_are_speedy = false
       @speedy_promise = {
-        :makes => 1,
+        :makes => 1.query,
+        :takes => 1.second,
       }
       @validate_number_of_queries = true
+      @validate_time_taken_for_render = true
       @throw_exception = false
     end
   end
@@ -72,9 +76,15 @@ module PerformancePromise
     @@promises
   end
 
-  def self.validate_promise(method, db_queries, options)
-    if self.configuration.validate_number_of_queries && db_queries.length > options[:makes]
+  def self.validate_promise(method, db_queries, render_time, options)
+    if self.configuration.validate_number_of_queries &&
+       options[:makes] &&
+       db_queries.length > options[:makes]
       report_promise_failed_too_many_queries(method, db_queries, options[:makes])
+    elsif self.configuration.validate_time_taken_for_render &&
+          options[:takes] &&
+          render_time > options[:takes]
+      report_promise_failed_render_took_too_long(method, render_time, options[:takes])
     else
       report_promise_passed(method, db_queries, options)
     end
@@ -110,6 +120,19 @@ module PerformancePromise
     end
   end
 
+  def self.report_promise_failed_render_took_too_long(method, render_time, takes)
+    PerformancePromise.configuration.logger.warn '-' * 80
+    PerformancePromise.configuration.logger.warn colored(:red, "Broken promise on #{method}: promised #{takes} seconds, took #{render_time} seconds")
+    PerformancePromise.configuration.logger.warn '-' * 80
+    if PerformancePromise.configuration.throw_exception
+      bp = BrokenPromise.new(
+        "Broken promise: promised #{takes} seconds, took #{render_time} secondss"
+      )
+      bp.set_backtrace([])
+      raise bp
+    end
+  end
+
   def self.report_promise_passed(method, db_queries, options)
     PerformancePromise.configuration.logger.warn '-' * 80
     PerformancePromise.configuration.logger.warn colored(:green, "Passed promise on #{method}: promised #{options[:makes]}, made #{db_queries.length}")
@@ -131,7 +154,6 @@ module PerformancePromise
       if count == 1
         order << "1.query"
       else
-        puts query[:sql]
         if (lookup_field = /WHERE .*"(.*?_id)" = \?/.match(query[:sql]))
           klass = lookup_field[1].humanize
           order << "n(#{klass}).queries"

@@ -38,6 +38,7 @@ PerformancePromise.configure do |config|
   #   'test',
   # ]
   # config.validate_number_of_queries = true
+  # config.validate_time_taken_for_render = true
   # config.logger = Rails.logger
   # config.throw_exception = false
 end
@@ -131,6 +132,17 @@ Credit goes to [Yehuda Katz][yehuda-katz] for the [port of decortators][ruby-dec
 > Will this affect my production service?
 
 By default, `performace_promise` is applied only in `development` and `test` environments. You can choose to override this, but is strongly discouraged.
+
+> What are some other kinds of performance guarantees that I can make with `performance_promise`?
+
+In addition to promises about the number of database queries, you can also make promises on how long the entire view will take to render.
+```ruby
+  Performance :makes => 1.query + n(Article).queries,
+              :takes => 1.second
+  def index
+    ...
+  end
+```
 
 >  Is this the same as [Bullet][bullet] gem?
 
