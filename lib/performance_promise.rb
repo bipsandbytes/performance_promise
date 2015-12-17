@@ -129,12 +129,12 @@ module PerformancePromise
     queries_with_count = summarize_queries(db_queries)
     queries_with_count.each do |query, count|
       if count == 1
-        order << "1.queries"
+        order << "1.query"
       else
         puts query[:sql]
         if (lookup_field = /WHERE .*"(.*?_id)" = \?/.match(query[:sql]))
           klass = lookup_field[1].humanize
-          order << "#{klass}.count.queries"
+          order << "n(#{klass}).queries"
         else
           order << "n(???)"
         end
