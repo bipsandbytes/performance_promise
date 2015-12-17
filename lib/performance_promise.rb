@@ -31,7 +31,7 @@ module PerformancePromise
         PerformancePromise::validate_promise(method_name, db_queries, promised)
       elsif PerformancePromise.configuration.untagged_methods_are_speedy
         PerformancePromise.configuration.logger.warn 'No promises made. Assuming Speedy'
-        promised = PerformancePromise.configuration.speedy_promise[:max_queries]
+        promised = PerformancePromise.configuration.speedy_promise
         PerformancePromise::validate_promise(method_name, db_queries, promised)
       end
     end
@@ -56,7 +56,7 @@ module PerformancePromise
       ]
       @untagged_methods_are_speedy = false
       @speedy_promise = {
-        :max_queries => 1,
+        :makes => 1,
       }
       @validate_number_of_queries = true
       @throw_exception = false
@@ -72,18 +72,18 @@ module PerformancePromise
     @@promises
   end
 
-  def self.validate_promise(method, db_queries, max_queries)
-    if self.configuration.validate_number_of_queries && db_queries.length > max_queries
-      report_promise_failed_too_many_queries(method, db_queries, max_queries)
+  def self.validate_promise(method, db_queries, options)
+    if self.configuration.validate_number_of_queries && db_queries.length > options[:makes]
+      report_promise_failed_too_many_queries(method, db_queries, options[:makes])
     else
-      report_promise_passed(method, db_queries, max_queries)
+      report_promise_passed(method, db_queries, options)
     end
   end
 
-  def self.report_promise_failed_too_many_queries(method, db_queries, max_queries)
+  def self.report_promise_failed_too_many_queries(method, db_queries, makes)
     guessed_order = guess_order(db_queries)
     PerformancePromise.configuration.logger.warn '-' * 80
-    PerformancePromise.configuration.logger.warn colored(:red, "Broken promise on #{method}: promised #{max_queries}, made #{db_queries.length}")
+    PerformancePromise.configuration.logger.warn colored(:red, "Broken promise on #{method}: promised #{makes}, made #{db_queries.length}")
     PerformancePromise.configuration.logger.warn colored(:cyan, "Possibly #{guessed_order}")
     backtrace = []
     summarize_queries(db_queries).each do |db_query, count|
@@ -102,7 +102,7 @@ module PerformancePromise
     PerformancePromise.configuration.logger.warn '-' * 80
     if PerformancePromise.configuration.throw_exception
       bp = BrokenPromise.new(
-        "Broken promise: Promised #{max_queries}, Made #{db_queries.length}; "\
+        "Broken promise: Promised #{makes}, Made #{db_queries.length}; "\
         "(Try #{guessed_order})"
       )
       bp.set_backtrace(backtrace)
@@ -110,9 +110,9 @@ module PerformancePromise
     end
   end
 
-  def self.report_promise_passed(method, db_queries, max_queries)
+  def self.report_promise_passed(method, db_queries, options)
     PerformancePromise.configuration.logger.warn '-' * 80
-    PerformancePromise.configuration.logger.warn colored(:green, "Passed promise on #{method}: promised #{max_queries}, made #{db_queries.length}")
+    PerformancePromise.configuration.logger.warn colored(:green, "Passed promise on #{method}: promised #{options[:makes]}, made #{db_queries.length}")
     PerformancePromise.configuration.logger.warn '-' * 80
   end
 
@@ -175,9 +175,9 @@ end
 
 
 class Performance < Decorator
-  def initialize(klass, method, max_queries)
+  def initialize(klass, method, options)
     @klass, @method = klass, method
-    PerformancePromise.promises["#{klass}\##{method.name.to_s}"] = max_queries
+    PerformancePromise.promises["#{klass}\##{method.name.to_s}"] = options
   end
 
   def call(this, *args)
@@ -188,6 +188,6 @@ end
 
 class Speedy < Performance
   def initialize(klass, method)
-    super(klass, method, PerformancePromise.configuration.speedy_promise[:max_queries])
+    super(klass, method, PerformancePromise.configuration.speedy_promise)
   end
 end

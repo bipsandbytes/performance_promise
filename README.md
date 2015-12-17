@@ -31,7 +31,7 @@ PerformancePromise.configure do |config|
   config.enable = true
   # config.untagged_methods_are_speedy = true
   # config.speedy_promise = {
-  #   :max_queries => 2,
+  #   :makes => 2,
   # }
   # config.allowed_environments = [
   #   'development',
@@ -61,7 +61,7 @@ You can annotate this action with a promise of how many database queries the act
 ```ruby
 class ArticlesController < ApplicationController
 
-  Performance 1.query
+  Performance :makes => 1.query
   def index
     @articles = Article.all
   end
@@ -72,7 +72,7 @@ Visit `/articles` to confirm that the view is rendered successfully again.
 
 Now suppose, you make the view more complex, causing it to execute more database queries
 ```ruby
-  Performance 1.query
+  Performance :makes => 1.query
   def index
     @articles = Article.all
     @total_comments = 0
@@ -86,7 +86,7 @@ Since the performance annotation has not been updated, visiting `/articles` now 
 
 Let's update the annotation:
 ```ruby
-  Performance 1.query + n(Article).queries
+  Performance :makes => 1.query + n(Article).queries
   def index
     @articles = Article.all
     @total_comments = 0
