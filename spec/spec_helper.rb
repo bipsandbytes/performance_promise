@@ -90,3 +90,20 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 =end
 end
+
+
+module Rails
+  class << self
+    def root
+      File.expand_path(__FILE__).split('/')[0..-3].join('/')
+    end
+
+    def logger
+      Logger.new(STDOUT)
+    end
+
+    def env
+      "test"
+    end
+  end
+end

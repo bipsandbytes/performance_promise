@@ -4,22 +4,6 @@ require './lib/performance_promise.rb'
 require './lib/performance_promise/decorators.rb'
 
 
-module Rails
-  class <<self
-    def root
-      File.expand_path(__FILE__).split('/')[0..-3].join('/')
-    end
-
-    def logger
-      Logger.new(STDOUT)
-    end
-
-    def env
-      "test"
-    end
-  end
-end
-
 RSpec.describe 'PerformancePromise' do
   context '.start' do
     context 'when not enabled' do
