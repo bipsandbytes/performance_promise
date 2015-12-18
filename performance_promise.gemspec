@@ -9,7 +9,8 @@ Gem::Specification.new do |s|
   s.files       = [
     'lib/performance_promise.rb',
     'lib/performance_promise/decorators.rb',
-    'lib/performance_promise/sql_recorder.rb'
+    'lib/performance_promise/sql_recorder.rb',
+    'lib/performance_promise/utils.rb',
   ]
   s.homepage    = 'http://rubygems.org/gems/performance_promise'
   s.license     = 'MIT'
