@@ -148,6 +148,11 @@ def n(model)
 end
 
 
+class ApplicationController < ActionController::Base
+  extend MethodDecorators
+end
+
+
 class Fixnum
   def queries
     self
