@@ -108,5 +108,7 @@ module Rails
   end
 end
 
-module ApplicationController
+module ActionController
+  class Base
+  end
 end

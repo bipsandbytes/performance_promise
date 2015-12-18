@@ -159,22 +159,3 @@ class Fixnum
   end
   alias :query :queries
 end
-
-
-class Performance < Decorator
-  def initialize(klass, method, options)
-    @klass, @method = klass, method
-    PerformancePromise.promises["#{klass}\##{method.name.to_s}"] = options
-  end
-
-  def call(this, *args)
-    @method.bind(this).call(*args)
-  end
-end
-
-
-class Speedy < Performance
-  def initialize(klass, method)
-    super(klass, method, PerformancePromise.configuration.speedy_promise)
-  end
-end
