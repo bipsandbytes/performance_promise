@@ -1,5 +1,6 @@
 require 'performance_promise/decorators'
 require 'performance_promise/sql_recorder.rb'
+require 'performance_promise/utils.rb'
 
 module PerformancePromise
   class << self
@@ -91,14 +92,14 @@ module PerformancePromise
   end
 
   def self.report_promise_failed_too_many_queries(method, db_queries, makes)
-    guessed_order = guess_order(db_queries)
+    guessed_order = Utils.guess_order(db_queries)
     PerformancePromise.configuration.logger.warn '-' * 80
-    PerformancePromise.configuration.logger.warn colored(:red, "Broken promise on #{method}: promised #{makes}, made #{db_queries.length}")
-    PerformancePromise.configuration.logger.warn colored(:cyan, "Possibly #{guessed_order}")
+    PerformancePromise.configuration.logger.warn Utils.colored(:red, "Broken promise on #{method}: promised #{makes}, made #{db_queries.length}")
+    PerformancePromise.configuration.logger.warn Utils.colored(:cyan, "Possibly #{guessed_order}")
     backtrace = []
-    summarize_queries(db_queries).each do |db_query, count|
+    Utils.summarize_queries(db_queries).each do |db_query, count|
       statement = "#{count} x #{db_query[:sql]}"
-      PerformancePromise.configuration.logger.warn colored(:cyan, statement)
+      PerformancePromise.configuration.logger.warn Utils.colored(:cyan, statement)
       backtrace << statement
       db_query[:trace].each do |trace|
         if trace.starts_with?('app')
@@ -106,7 +107,7 @@ module PerformancePromise
           trace = "    |_" + File.read(file).split("\n")[line_number.to_i - 1].strip + ' (' + trace + ')'
         end
         backtrace << trace
-        PerformancePromise.configuration.logger.warn colored(:cyan, trace)
+        PerformancePromise.configuration.logger.warn Utils.colored(:cyan, trace)
       end
     end
     PerformancePromise.configuration.logger.warn '-' * 80
@@ -122,7 +123,7 @@ module PerformancePromise
 
   def self.report_promise_failed_render_took_too_long(method, render_time, takes)
     PerformancePromise.configuration.logger.warn '-' * 80
-    PerformancePromise.configuration.logger.warn colored(:red, "Broken promise on #{method}: promised #{takes} seconds, took #{render_time} seconds")
+    PerformancePromise.configuration.logger.warn Utils.colored(:red, "Broken promise on #{method}: promised #{takes} seconds, took #{render_time} seconds")
     PerformancePromise.configuration.logger.warn '-' * 80
     if PerformancePromise.configuration.throw_exception
       bp = BrokenPromise.new(
@@ -135,49 +136,8 @@ module PerformancePromise
 
   def self.report_promise_passed(method, db_queries, options)
     PerformancePromise.configuration.logger.warn '-' * 80
-    PerformancePromise.configuration.logger.warn colored(:green, "Passed promise on #{method}: promised #{options[:makes]}, made #{db_queries.length}")
+    PerformancePromise.configuration.logger.warn Utils.colored(:green, "Passed promise on #{method}: promised #{options[:makes]}, made #{db_queries.length}")
     PerformancePromise.configuration.logger.warn '-' * 80
-  end
-
-  def self.summarize_queries(db_queries)
-    summary = Hash.new(0)
-    db_queries.each do |query|
-      summary[query.except(:duration)] += 1
-    end
-    summary
-  end
-
-  def self.guess_order(db_queries)
-    order = []
-    queries_with_count = summarize_queries(db_queries)
-    queries_with_count.each do |query, count|
-      if count == 1
-        order << "1.query"
-      else
-        if (lookup_field = /WHERE .*"(.*?_id)" = \?/.match(query[:sql]))
-          klass = lookup_field[1].humanize
-          order << "n(#{klass}).queries"
-        else
-          order << "n(???)"
-        end
-      end
-    end
-
-    order.join(" + ")
-  end
-
-  def self.colored(color, string)
-    color =
-      case color
-      when :red
-        "\e[31m"
-      when :green
-        "\e[32m"
-      when :cyan
-        "\e[36m"
-      end
-    end_color = "\e[0m"
-    "#{color}#{string}#{end_color}"
   end
 end
 
