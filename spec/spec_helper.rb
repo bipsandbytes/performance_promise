@@ -107,3 +107,6 @@ module Rails
     end
   end
 end
+
+module ApplicationController
+end
