@@ -152,7 +152,7 @@ RSpec.describe 'PerformancePromise' do
       context 'when an actual promise is made' do
         it 'reports a failure when a promise fails' do
           options = {
-            :makes => 0,
+            :makes => 0.queries,
           }
           queries = [
             'SELECT * from articles',
@@ -163,7 +163,7 @@ RSpec.describe 'PerformancePromise' do
 
         it 'reports a success when a promise passes' do
           options = {
-            :makes => 1,
+            :makes => 1.query,
           }
           queries = [
             'SELECT * from articles',
@@ -206,29 +206,6 @@ RSpec.describe 'PerformancePromise' do
           PerformancePromise.validate_promise('ActionController#index', [], 1, options)
         end
       end
-    end
-  end
-
-  context '.n' do
-    before do
-      stub_const 'M', Class.new
-      M.class_eval do
-        def count
-        end
-      end
-    end
-
-    let(:model) { M.new }
-
-    it 'shortcircuits when in production' do
-      expect(Rails).to receive(:env).and_return('production')
-      expect(model).not_to receive(:count)
-      n(model)
-    end
-
-    it 'returns the count of objects in the model' do
-      expect(model).to receive(:count)
-      n(model)
     end
   end
 end

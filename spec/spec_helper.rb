@@ -112,3 +112,10 @@ module ActionController
   class Base
   end
 end
+
+module ActiveRecord
+  class Base
+    def self.count
+    end
+  end
+end
