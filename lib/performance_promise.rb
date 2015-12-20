@@ -1,6 +1,7 @@
 require 'performance_promise/decorators'
 require 'performance_promise/sql_recorder.rb'
 require 'performance_promise/utils.rb'
+require 'performance_promise/lazily_evaluated.rb'
 
 module PerformancePromise
   class << self
@@ -80,8 +81,8 @@ module PerformancePromise
   def self.validate_promise(method, db_queries, render_time, options)
     if self.configuration.validate_number_of_queries &&
        options[:makes] &&
-       db_queries.length > options[:makes]
-      report_promise_failed_too_many_queries(method, db_queries, options[:makes])
+       db_queries.length > options[:makes].evaluate
+      report_promise_failed_too_many_queries(method, db_queries, options[:makes].evaluate)
     elsif self.configuration.validate_time_taken_for_render &&
           options[:takes] &&
           render_time > options[:takes]
@@ -136,26 +137,12 @@ module PerformancePromise
 
   def self.report_promise_passed(method, db_queries, options)
     PerformancePromise.configuration.logger.warn '-' * 80
-    PerformancePromise.configuration.logger.warn Utils.colored(:green, "Passed promise on #{method}: promised #{options[:makes]}, made #{db_queries.length}")
+    PerformancePromise.configuration.logger.warn Utils.colored(:green, "Passed promise on #{method}: promised #{options[:makes].evaluate}, made #{db_queries.length}")
     PerformancePromise.configuration.logger.warn '-' * 80
   end
 end
 
 
-def n(model)
-  return 1 unless PerformancePromise.configuration.allowed_environments.include?(Rails.env)
-  model.count
-end
-
-
 class ApplicationController < ActionController::Base
   extend MethodDecorators
-end
-
-
-class Fixnum
-  def queries
-    self
-  end
-  alias :query :queries
 end

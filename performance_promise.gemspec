@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
     'lib/performance_promise/performance.rb',
     'lib/performance_promise/speedy.rb',
     'lib/performance_promise/utils.rb',
+    'lib/performance_promise/lazily_evaluated.rb',
   ]
   s.homepage    = 'http://rubygems.org/gems/performance_promise'
   s.license     = 'MIT'

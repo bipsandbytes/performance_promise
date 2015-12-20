@@ -16,7 +16,7 @@ module Utils
       else
         if (lookup_field = /WHERE .*"(.*?_id)" = \?/.match(query[:sql]))
           klass = lookup_field[1].humanize
-          order << "n(#{klass}).queries"
+          order << "#{klass}.N.queries"
         else
           order << "n(???)"
         end

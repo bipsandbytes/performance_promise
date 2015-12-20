@@ -85,11 +85,11 @@ Now suppose, you make the view more complex, causing it to execute more database
 ```
 Since the performance annotation has not been updated, visiting `/articles` now will throw an exception. The exception tells you that the performance of your view does not respect the annotation promise.
 
-![alt tag](http://i.imgur.com/wOIlKIa.png)
+![alt tag](http://i.imgur.com/S5unAoJ.png)
 
 Let's update the annotation:
 ```ruby
-  Performance :makes => 1.query + n(Article).queries
+  Performance :makes => 1.query + Article.N.queries
   def index
     @articles = Article.all
     @total_comments = 0
@@ -140,7 +140,7 @@ By default, `performace_promise` is applied only in `development` and `test` env
 
 In addition to promises about the number of database queries, you can also make promises on how long the entire view will take to render.
 ```ruby
-  Performance :makes => 1.query + n(Article).queries,
+  Performance :makes => 1.query + Article.N.queries,
               :takes => 1.second
   def index
     ...
