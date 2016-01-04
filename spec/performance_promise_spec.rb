@@ -172,6 +172,18 @@ RSpec.describe 'PerformancePromise' do
           expect(PerformancePromise).to receive(:report_promise_passed)
           PerformancePromise.validate_promise('ActionController#index', queries, 1, options)
         end
+
+        it 'does not fail if an action is explicitly skipped' do
+          options = {
+            :makes => 0.queries,
+            :skip => true,
+          }
+          queries = [
+            'SELECT * from articles',
+          ]
+          expect(PerformancePromise).not_to receive(:report_promise_failed_too_many_queries)
+          PerformancePromise.validate_promise('ActionController#index', queries, 1, options)
+        end
       end
     end
 

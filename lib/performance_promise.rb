@@ -79,6 +79,7 @@ module PerformancePromise
   end
 
   def self.validate_promise(method, db_queries, render_time, options)
+    return if options[:skip]
     if self.configuration.validate_number_of_queries &&
        options[:makes] &&
        db_queries.length > options[:makes].evaluate
