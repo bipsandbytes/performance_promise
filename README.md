@@ -29,6 +29,9 @@ require 'performance_promise'
 
 PerformancePromise.configure do |config|
   config.enable = true
+  # config.validations = [
+  #   :makes,  # validate the number of DB queries made
+  # ]
   # config.untagged_methods_are_speedy = true
   # config.speedy_promise = {
   #   :makes => 2,
@@ -37,10 +40,8 @@ PerformancePromise.configure do |config|
   #   'development',
   #   'test',
   # ]
-  # config.validate_number_of_queries = true
-  # config.validate_time_taken_for_render = true
   # config.logger = Rails.logger
-  # config.throw_exception = false
+  # config.throw_exception = true
 end
 PerformancePromise.start
 ```

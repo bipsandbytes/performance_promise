@@ -2,6 +2,7 @@ require 'performance_promise/decorators'
 require 'performance_promise/sql_recorder.rb'
 require 'performance_promise/utils.rb'
 require 'performance_promise/lazily_evaluated.rb'
+require 'performance_promise/performance_validations.rb'
 
 module PerformancePromise
   class << self
@@ -42,17 +43,19 @@ module PerformancePromise
 
   class Configuration
     attr_accessor :enable
+    attr_accessor :validations
     attr_accessor :logger
     attr_accessor :allowed_environments
     attr_accessor :speedy_promise
     attr_accessor :untagged_methods_are_speedy
-    attr_accessor :validate_number_of_queries
-    attr_accessor :validate_time_taken_for_render
     attr_accessor :throw_exception
 
     def initialize
       # Set default values
       @enable = false
+      @validations = [
+        :makes,
+      ]
       @logger = Rails.logger
       @allowed_environments = [
         'development',
@@ -63,9 +66,7 @@ module PerformancePromise
         :makes => 1.query,
         :takes => 1.second,
       }
-      @validate_number_of_queries = true
-      @validate_time_taken_for_render = true
-      @throw_exception = false
+      @throw_exception = true
     end
   end
 
@@ -80,67 +81,32 @@ module PerformancePromise
 
   def self.validate_promise(method, db_queries, render_time, options)
     return if options[:skip]
-    if self.configuration.validate_number_of_queries &&
-       options[:makes] &&
-       db_queries.length > options[:makes].evaluate
-      report_promise_failed_too_many_queries(method, db_queries, options[:makes].evaluate)
-    elsif self.configuration.validate_time_taken_for_render &&
-          options[:takes] &&
-          render_time > options[:takes]
-      report_promise_failed_render_took_too_long(method, render_time, options[:takes])
-    else
-      report_promise_passed(method, db_queries, options)
-    end
-  end
-
-  def self.report_promise_failed_too_many_queries(method, db_queries, makes)
-    guessed_order = Utils.guess_order(db_queries)
-    PerformancePromise.configuration.logger.warn '-' * 80
-    PerformancePromise.configuration.logger.warn Utils.colored(:red, "Broken promise on #{method}: promised #{makes}, made #{db_queries.length}")
-    PerformancePromise.configuration.logger.warn Utils.colored(:cyan, "Possibly #{guessed_order}")
-    backtrace = []
-    Utils.summarize_queries(db_queries).each do |db_query, count|
-      statement = "#{count} x #{db_query[:sql]}"
-      PerformancePromise.configuration.logger.warn Utils.colored(:cyan, statement)
-      backtrace << statement
-      db_query[:trace].each do |trace|
-        if trace.starts_with?('app')
-          file, line_number = trace.split(':')
-          trace = "    |_" + File.read(file).split("\n")[line_number.to_i - 1].strip + ' (' + trace + ')'
+    promise_broken = false
+    self.configuration.validations.each do |validation|
+      promised = options[validation]
+      validation_method = 'validate_' + validation.to_s
+      fail_method = 'report_failed_' + validation.to_s
+      if promised && PerformanceValidations.send(validation_method, db_queries, render_time, promised)
+        error_message, backtrace =
+          PerformanceValidations.send(fail_method, db_queries, render_time, promised)
+        if PerformancePromise.configuration.throw_exception
+          bp = BrokenPromise.new("Broken promise: #{error_message}")
+          bp.set_backtrace(backtrace)
+          raise bp
+        else
+          PerformancePromise.configuration.logger.warn '-' * 80
+          PerformancePromise.configuration.logger.warn Utils.colored(:red, error_message)
+          backtrace.each do |trace|
+            PerformancePromise.configuration.logger.warn Utils.colored(:cyan, error_message)
+          end
+          PerformancePromise.configuration.logger.warn '-' * 80
         end
-        backtrace << trace
-        PerformancePromise.configuration.logger.warn Utils.colored(:cyan, trace)
+        promise_broken = true
       end
     end
-    PerformancePromise.configuration.logger.warn '-' * 80
-    if PerformancePromise.configuration.throw_exception
-      bp = BrokenPromise.new(
-        "Broken promise: Promised #{makes}, Made #{db_queries.length}; "\
-        "(Try #{guessed_order})"
-      )
-      bp.set_backtrace(backtrace)
-      raise bp
-    end
+    PerformanceValidations.report_promise_passed(method, db_queries, options) unless promise_broken
   end
 
-  def self.report_promise_failed_render_took_too_long(method, render_time, takes)
-    PerformancePromise.configuration.logger.warn '-' * 80
-    PerformancePromise.configuration.logger.warn Utils.colored(:red, "Broken promise on #{method}: promised #{takes} seconds, took #{render_time} seconds")
-    PerformancePromise.configuration.logger.warn '-' * 80
-    if PerformancePromise.configuration.throw_exception
-      bp = BrokenPromise.new(
-        "Broken promise: promised #{takes} seconds, took #{render_time} secondss"
-      )
-      bp.set_backtrace([])
-      raise bp
-    end
-  end
-
-  def self.report_promise_passed(method, db_queries, options)
-    PerformancePromise.configuration.logger.warn '-' * 80
-    PerformancePromise.configuration.logger.warn Utils.colored(:green, "Passed promise on #{method}: promised #{options[:makes].evaluate}, made #{db_queries.length}")
-    PerformancePromise.configuration.logger.warn '-' * 80
-  end
 end
 
 

@@ -123,29 +123,30 @@ RSpec.describe 'PerformancePromise' do
     before(:each) do
       PerformancePromise.configure do |config|
         config.enable = true
-        config.validate_number_of_queries = false
-        config.validate_time_taken_for_render = false
+        config.validations = []
       end
       PerformancePromise.start
     end
 
     it 'passes promises if all options are disabled' do
-      expect(PerformancePromise).not_to receive(:report_promise_failed_too_many_queries)
-      expect(PerformancePromise).not_to receive(:report_promise_failed_render_took_too_long)
-      expect(PerformancePromise).to receive(:report_promise_passed)
+      expect(PerformanceValidations).not_to receive(:report_failed_makes)
+      expect(PerformanceValidations).not_to receive(:report_failed_takes)
+      expect(PerformanceValidations).to receive(:report_promise_passed)
       PerformancePromise.validate_promise('ActionController#index', [], 1, {})
     end
 
     context 'when asked to validate number of queries' do
       before(:each) do
         PerformancePromise.configure do |config|
-          config.validate_number_of_queries = true
+          config.validations = [
+            :makes,
+          ]
         end
       end
 
       it 'does not do anything if no actual promise is made on #queries' do
-        expect(PerformancePromise).not_to receive(:report_promise_failed_too_many_queries)
-        expect(PerformancePromise).to receive(:report_promise_passed)
+        expect(PerformanceValidations).not_to receive(:report_failed_makes)
+        expect(PerformanceValidations).to receive(:report_promise_passed)
         PerformancePromise.validate_promise('ActionController#index', [], 1, {})
       end
 
@@ -157,8 +158,10 @@ RSpec.describe 'PerformancePromise' do
           queries = [
             'SELECT * from articles',
           ]
-          expect(PerformancePromise).to receive(:report_promise_failed_too_many_queries)
-          PerformancePromise.validate_promise('ActionController#index', queries, 1, options)
+          expect(PerformanceValidations).to receive(:report_failed_makes).and_return(['', []])
+          expect {
+            PerformancePromise.validate_promise('ActionController#index', queries, 1, options)
+          }.to raise_error(PerformancePromise::BrokenPromise)
         end
 
         it 'reports a success when a promise passes' do
@@ -168,8 +171,8 @@ RSpec.describe 'PerformancePromise' do
           queries = [
             'SELECT * from articles',
           ]
-          expect(PerformancePromise).not_to receive(:report_promise_failed_too_many_queries)
-          expect(PerformancePromise).to receive(:report_promise_passed)
+          expect(PerformanceValidations).not_to receive(:report_failed_makes)
+          expect(PerformanceValidations).to receive(:report_promise_passed)
           PerformancePromise.validate_promise('ActionController#index', queries, 1, options)
         end
 
@@ -181,7 +184,7 @@ RSpec.describe 'PerformancePromise' do
           queries = [
             'SELECT * from articles',
           ]
-          expect(PerformancePromise).not_to receive(:report_promise_failed_too_many_queries)
+          expect(PerformanceValidations).not_to receive(:report_failed_makes)
           PerformancePromise.validate_promise('ActionController#index', queries, 1, options)
         end
       end
@@ -190,31 +193,35 @@ RSpec.describe 'PerformancePromise' do
     context 'when asked to validate time taken for render' do
       before(:each) do
         PerformancePromise.configure do |config|
-          config.validate_time_taken_for_render = true
+          config.validations = [
+            :takes,
+          ]
         end
       end
 
       it 'does not do anything if no actual promise is made on time taken' do
-        expect(PerformancePromise).not_to receive(:report_promise_failed_render_took_too_long)
-        expect(PerformancePromise).to receive(:report_promise_passed)
+        expect(PerformanceValidations).not_to receive(:report_failed_takes)
+        expect(PerformanceValidations).to receive(:report_promise_passed)
         PerformancePromise.validate_promise('ActionController#index', [], 1, {})
       end
 
       context 'when an actual promise is made' do
         it 'reports a failure when a promise fails' do
           options = {
-            :takes => 0,
+            :takes => 0.seconds,
           }
-          expect(PerformancePromise).to receive(:report_promise_failed_render_took_too_long)
-          PerformancePromise.validate_promise('ActionController#index', [], 1, options)
+          expect(PerformanceValidations).to receive(:report_failed_takes).and_return(['', []])
+          expect {
+            PerformancePromise.validate_promise('ActionController#index', [], 1, options)
+          }.to raise_error(PerformancePromise::BrokenPromise)
         end
 
         it 'reports a success when a promise passes' do
           options = {
             :takes => 1,
           }
-          expect(PerformancePromise).not_to receive(:report_promise_failed_render_took_too_long)
-          expect(PerformancePromise).to receive(:report_promise_passed)
+          expect(PerformanceValidations).not_to receive(:report_failed_takes)
+          expect(PerformanceValidations).to receive(:report_promise_passed)
           PerformancePromise.validate_promise('ActionController#index', [], 1, options)
         end
       end
