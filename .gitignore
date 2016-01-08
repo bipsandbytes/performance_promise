@@ -33,3 +33,9 @@ bower.json
 
 # Ignore pow environment settings
 .powenv
+
+# Ignore rbenv
+.ruby-version
+
+# Ignore any created gem files
+*.gem
