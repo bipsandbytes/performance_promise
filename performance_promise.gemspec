@@ -6,19 +6,8 @@ Gem::Specification.new do |s|
   s.description = 'Annotate and validate your actions with promises'
   s.authors     = ['Bipin Suresh']
   s.email       = 'bipins@alumni.stanford.edu'
-  s.files       = [
-    'lib/performance_promise.rb',
-    'lib/performance_promise/decorators.rb',
-    'lib/performance_promise/sql_recorder.rb',
-    'lib/performance_promise/performance.rb',
-    'lib/performance_promise/speedy.rb',
-    'lib/performance_promise/utils.rb',
-    'lib/performance_promise/lazily_evaluated.rb',
-    'lib/performance_promise/performance_validations.rb',
-    'lib/performance_promise/validations/number_of_db_queries.rb',
-    'lib/performance_promise/validations/time_taken_for_render.rb',
-    'lib/performance_promise/validations/full_table_scans.rb',
-  ]
+  s.files       = `git ls-files -z`.split("\x0")
+  s.test_files  = s.files.grep(%r{^(test|spec|features)/})
   s.homepage    = 'http://rubygems.org/gems/performance_promise'
   s.license     = 'MIT'
 end
