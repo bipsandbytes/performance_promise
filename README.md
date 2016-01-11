@@ -25,7 +25,7 @@ gem build performance_promise.gemspec
 ## Configuration
 For safety, `performance_promise` is disabled by default. To enable it, create a new file `config/initializers/performance_promise.rb` with the following code:
 ```ruby
-require 'performance_promise'
+require 'performance_promise/performance.rb'
 
 PerformancePromise.configure do |config|
   config.enable = true
