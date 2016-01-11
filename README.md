@@ -8,13 +8,13 @@ Example syntax:
 class ArticlesController < ApplicationController
 
   Performance :makes => 1.query,
-              :takes => 1.second
+              :full_table_scans => [Article]
   def index
     # ...
   end
 
   Performance :makes => 1.query + Article.N.queries,
-              :takes => 5.seconds
+              :full_table_scans => [Article, Comment]
   def expensive_action
     # ...
   end
