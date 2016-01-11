@@ -139,14 +139,17 @@ By default, `performace_promise` is applied only in `development` and `test` env
 
 > **What are some other kinds of performance guarantees that I can make with `performance_promise`?**
 
-In addition to promises about the number of database queries, you can also make promises on how long the entire view will take to render.
+In addition to promises about the number of database queries, you can also make promises on how long the entire view will take to render, and whether it performs any table scans.
 ```ruby
   Performance :makes => 1.query + Article.N.queries,
-              :takes => 1.second
+              :takes => 1.second,
+              :full_tables_scans => [Article]
   def index
     ...
   end
 ```
+
+If you come up with other validations that you think will be useful, please consider sharing it with the community by [writing your own plugin here](https://github.com/bipsandbytes/performance_promise/tree/master/lib/performance_promise/validations), and raising a Pull Request.
 
 > **Is this the same as [Bullet][bullet] gem?**
 
