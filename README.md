@@ -5,6 +5,20 @@ You can declare the performance characteristics of your Rails actions in code (r
 
 You may also choose to enable a default/minimum performance promise for _all_ actions. You can reap all the benefits of performance validation without having to make any changes to code except tagging expensive actions.
 
+Example syntax:
+```ruby
+class ArticlesController < ApplicationController
+
+  Performance :makes => 1.query + Article.N.queries,
+              :takes => 1.second
+  def index
+    # ...
+  end
+
+end
+```
+
+
 ## Installation
 You can install it as a gem:
 ```sh
