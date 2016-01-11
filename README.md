@@ -3,8 +3,6 @@ The `performance_promise` gem enables you to annotate and validate the performan
 
 You can declare the performance characteristics of your Rails actions in code (right next to the action definition itself), and `performance_promise` will monitor and validate the promise. If the action breaks the promise, the `performance_promise` gem will alert you and provide a helpful suggestion with a passing performance annotation.
 
-You may also choose to enable a default/minimum performance promise for _all_ actions. You can reap all the benefits of performance validation without having to make any changes to code except tagging expensive actions.
-
 Example syntax:
 ```ruby
 class ArticlesController < ApplicationController
@@ -22,6 +20,8 @@ class ArticlesController < ApplicationController
   end
 end
 ```
+
+You may also choose to enable a default/minimum performance promise for _all_ actions by turning on the `untagged_methods_are_speedy` config parameter ([see here](https://github.com/bipsandbytes/performance_promise/blob/master/README.md#untagged_methods_are_speedy-bool)). **You can reap all the benefits of performance validation without having to make any changes to code except tagging expensive actions**.
 
 
 ## Installation
