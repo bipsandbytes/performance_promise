@@ -21,7 +21,7 @@ class ArticlesController < ApplicationController
 end
 ```
 
-You may also choose to enable a default/minimum performance promise for _all_ actions by turning on the `untagged_methods_are_speedy` config parameter ([see here](https://github.com/bipsandbytes/performance_promise/blob/master/README.md#untagged_methods_are_speedy-bool)). **You can reap all the benefits of performance validation without having to make any changes to code except tagging expensive actions**.
+You may also choose to enable a default/minimum performance promise for _all_ actions by turning on the `untagged_methods_are_speedy` config parameter ([see here](https://github.com/bipsandbytes/performance_promise#untagged_methods_are_speedy-bool)). **You can reap all the benefits of performance validation without having to make any changes to code except tagging expensive actions**.
 
 
 ## Installation
