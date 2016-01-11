@@ -9,12 +9,17 @@ Example syntax:
 ```ruby
 class ArticlesController < ApplicationController
 
-  Performance :makes => 1.query + Article.N.queries,
+  Performance :makes => 1.query,
               :takes => 1.second
   def index
     # ...
   end
 
+  Performance :makes => 1.query + Article.N.queries,
+              :takes => 5.seconds
+  def expensive_action
+    # ...
+  end
 end
 ```
 
