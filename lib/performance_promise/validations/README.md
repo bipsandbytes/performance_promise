@@ -7,30 +7,29 @@ You can easily extend `performance_promise` by writing your own validations. You
 3. Enable your validation in configuration
 
 ## Write your validation
-Create a new file in this directory, which simply defines two functions:
+Create a new file in this directory, which simply one function:
 
 ```ruby
-module VALIDATION
+module MODULE_NAME
   def validate_NAME(db_queries, render_time, promised)
-    ...
-  end
-  
-  def report_failed_NAME(db_queries, render_time, promised)
     ...
   end
 end
 ```
 
-* `VALIDATION`: A name for the module
-* `NAME`: The symbol that will be used in the `Performance` promise. For example, if the `NAME` is `makes`, then the function name will be `validates_makes`, and the `Promise` will take an option `:makes`.
-* `validates_NAME`: A function that is called if the a function makes a promise with that `NAME`. The function should return `true` if the validation fails i.e. the performance promise is broken.
-* `report_failed_NAME`: A function called to report why the promise was broken, and possibly how to fix it. Should return an error message and a (possibly empty) backtrace.
+* `MODULE_NAME`: A name for the module
+* `NAME`: The symbol that will be used in the `Performance` promise. For example, if the `NAME` is `makes`, then the function function name will be `validates_makes`, and the `Promise` will take an option `:makes`.
+* `validates_NAME`: A function that is called if the a function makes a promise with that `NAME`.
 
+The function takes 3 parameters:
+  * `db_queries`: An `array` of database queries which can be inspected.
+  * `render_time`: Time it took to render the view.
+  * `promised`: The performance guarantee made by the author.
 
-Each of the function receives the same set of parameters:
-* `db_queries`: An `array` of database queries which can be inspected.
-* `render_time`: Time it took to render the view.
-* `promised`: The performance guarantee made by the author.
+And returns 3 parameters:
+  * `passes`: Whether the promised made by the author in `promised` is upheld
+  * `error_message`: An error message to show to the user explaining why the promise failed, and a best guess of how to fix it, if possible.
+  * `backtrace`: If possible, an `array` showing the codepath that caused the promise to be broken.
 
 See [time_taken_for_render](https://github.com/bipsandbytes/performance_promise/blob/master/lib/performance_promise/validations/time_taken_for_render.rb) for a simple example.
 
@@ -39,7 +38,7 @@ You are now ready to register this plugin. Simply add this plugin to the list of
 ```ruby
 module PerformanceValidations
   ...
-  extend VALIDATION
+  extend MODULE_NAME
   ...
 end
 ```
@@ -54,5 +53,4 @@ PerformancePromise.configure do |config|
     :NAME,
   ]
 end
-```
 ```

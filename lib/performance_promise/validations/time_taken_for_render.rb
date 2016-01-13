@@ -1,11 +1,13 @@
 module ValidateTimeTakenForRender
   def validate_takes(db_queries, render_time, takes)
-    render_time > takes
-  end
-
-  def report_failed_takes(db_queries, render_time, takes)
-    error_message = "promised #{takes} seconds, took #{render_time} seconds"
+    passes = (render_time <= takes)
+    error_message = ''
     backtrace = []
-    return error_message, backtrace
+
+    unless passes
+        error_message = "promised #{takes} seconds, took #{render_time} seconds"
+    end
+
+    return passes, error_message, backtrace
   end
 end

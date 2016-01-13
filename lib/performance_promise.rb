@@ -84,24 +84,25 @@ module PerformancePromise
     promise_broken = false
     self.configuration.validations.each do |validation|
       promised = options[validation]
-      validation_method = 'validate_' + validation.to_s
-      fail_method = 'report_failed_' + validation.to_s
-      if promised && PerformanceValidations.send(validation_method, db_queries, render_time, promised)
-        error_message, backtrace =
-          PerformanceValidations.send(fail_method, db_queries, render_time, promised)
-        if PerformancePromise.configuration.throw_exception
-          bp = BrokenPromise.new("Broken promise: #{error_message}")
-          bp.set_backtrace(backtrace)
-          raise bp
-        else
-          PerformancePromise.configuration.logger.warn '-' * 80
-          PerformancePromise.configuration.logger.warn Utils.colored(:red, error_message)
-          backtrace.each do |trace|
-            PerformancePromise.configuration.logger.warn Utils.colored(:cyan, error_message)
+      if promised
+        validation_method = 'validate_' + validation.to_s
+        passed, error_message, backtrace =
+          PerformanceValidations.send(validation_method, db_queries, render_time, promised)
+        unless passed
+          if PerformancePromise.configuration.throw_exception
+            bp = BrokenPromise.new("Broken promise: #{error_message}")
+            bp.set_backtrace(backtrace)
+            raise bp
+          else
+            PerformancePromise.configuration.logger.warn '-' * 80
+            PerformancePromise.configuration.logger.warn Utils.colored(:red, error_message)
+            backtrace.each do |trace|
+              PerformancePromise.configuration.logger.warn Utils.colored(:cyan, error_message)
+            end
+            PerformancePromise.configuration.logger.warn '-' * 80
           end
-          PerformancePromise.configuration.logger.warn '-' * 80
+          promise_broken = true
         end
-        promise_broken = true
       end
     end
     PerformanceValidations.report_promise_passed(method, db_queries, options) unless promise_broken

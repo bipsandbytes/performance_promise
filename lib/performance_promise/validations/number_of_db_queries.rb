@@ -1,10 +1,15 @@
 module ValidateNumberOfQueries
   def validate_makes(db_queries, render_time, makes)
-    db_queries.length > makes.evaluate
-  end
+    makes = makes.evaluate  # force evaluation of lazy evaluated promise
 
-  def report_failed_makes(db_queries, render_time, makes)
-    makes = makes.evaluate
+    passes = (db_queries.length <= makes)
+    error_message = ''
+    backtrace = []
+
+    if passes
+        return passes, error_message, backtrace
+    end
+
     guessed_order = Utils.guess_order(db_queries)
     error_message = "promised #{makes}, made #{db_queries.length} (possibly #{guessed_order})"
     backtrace = []
@@ -19,6 +24,7 @@ module ValidateNumberOfQueries
         backtrace << trace
       end
     end
-    return error_message, backtrace
+
+    return passes, error_message, backtrace
   end
 end
