@@ -7,7 +7,7 @@ You can easily extend `performance_promise` by writing your own validations. You
 3. Enable your validation in configuration
 
 ## Write your validation
-Create a new file in this directory, which simply one function:
+Create a new file in this directory, with a single function:
 
 ```ruby
 module MODULE_NAME
@@ -17,7 +17,7 @@ module MODULE_NAME
 end
 ```
 
-* `MODULE_NAME`: A name for the module
+* `MODULE_NAME`: A name for the module.
 * `NAME`: The symbol that will be used in the `Performance` promise. For example, if the `NAME` is `makes`, then the function function name will be `validates_makes`, and the `Promise` will take an option `:makes`.
 * `validates_NAME`: A function that is called if the a function makes a promise with that `NAME`.
 
@@ -27,7 +27,7 @@ The function takes 3 parameters:
   * `promised`: The performance guarantee made by the author.
 
 And returns 3 parameters:
-  * `passes`: Whether the promised made by the author in `promised` is upheld
+  * `passes`: Whether the promised made by the author in `promised` is upheld.
   * `error_message`: An error message to show to the user explaining why the promise failed, and a best guess of how to fix it, if possible.
   * `backtrace`: If possible, an `array` showing the codepath that caused the promise to be broken.
 
