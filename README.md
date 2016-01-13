@@ -31,8 +31,10 @@ gem install performance_promise
 ```
 
 or add it to a Gemfile (Bundler):
-```sh
-gem "performance_promise", :group => "development"
+```ruby
+group :development, :test do
+  gem 'performance_promise'
+end
 ```
 
 ## Building
