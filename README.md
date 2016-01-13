@@ -121,6 +121,20 @@ Let's update the annotation:
 ```
 Now that you have annotated the action correctly, visiting `/articles` renders successfully.
 
+The experienced code-reviewer however might ask the author to get rid of the `N + 1` query here, and use `.includes` instead:
+```ruby
+  Performance :makes => 2.queries
+  def index
+    @articles = Article.all.includes(:comments)
+    @total_comments = 0
+    @articles.each do |article|
+      @total_comments += article.comments.length
+    end
+    puts @total_comments
+  end
+```
+And now, we've successfully caught and averted a bad code commit!
+
 ## Advanced configuration
 `performance_promise` opens up more functionality through configuration variables:
 
