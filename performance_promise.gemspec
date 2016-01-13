@@ -8,6 +8,6 @@ Gem::Specification.new do |s|
   s.email       = 'bipins@alumni.stanford.edu'
   s.files       = `git ls-files -z`.split("\x0")
   s.test_files  = s.files.grep(%r{^(test|spec|features)/})
-  s.homepage    = 'http://rubygems.org/gems/performance_promise'
+  s.homepage    = 'https://github.com/bipsandbytes/performance_promise'
   s.license     = 'MIT'
 end
