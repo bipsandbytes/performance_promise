@@ -97,7 +97,7 @@ module PerformancePromise
             PerformancePromise.configuration.logger.warn '-' * 80
             PerformancePromise.configuration.logger.warn Utils.colored(:red, error_message)
             backtrace.each do |trace|
-              PerformancePromise.configuration.logger.warn Utils.colored(:cyan, error_message)
+              PerformancePromise.configuration.logger.warn Utils.colored(:cyan, trace)
             end
             PerformancePromise.configuration.logger.warn '-' * 80
           end
