@@ -33,7 +33,7 @@ class SQLRecorder
       'SCHEMA',
       'SQLR-EXPLAIN',
     ]
-    payload[:name] && ignore_query_names.any? { |name| payload[:name].in?(name) }
+    payload[:name] && ignore_query_names.any? { |name| payload[:name].include?(name) }
   end
 
   def clean_trace(trace)
