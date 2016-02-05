@@ -67,6 +67,13 @@ end
 PerformancePromise.start
 ```
 
+Then, extend your `ApplicationController` in `app/controllers/application_controller.rb`:
+```ruby
+class ApplicationController < ActionController::Base
+  extend MethodDecorators
+  ...
+```
+
 ## Usage
 To understand how to use `performance_promise`, let's use a simple [Blog App][rails-getting-started]. A `Blog` has `Article`s, each of which may have one or more `Comment`s.
 

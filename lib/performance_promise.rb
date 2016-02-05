@@ -107,10 +107,4 @@ module PerformancePromise
     end
     PerformanceValidations.report_promise_passed(method, db_queries, options) unless promise_broken
   end
-
-end
-
-
-class ApplicationController < ActionController::Base
-  extend MethodDecorators
 end
