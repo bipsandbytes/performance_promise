@@ -55,7 +55,7 @@ PerformancePromise.configure do |config|
   # ]
   # config.untagged_methods_are_speedy = true
   # config.speedy_promise = {
-  #   :makes => 2,
+  #   :makes => 2.queries,
   # }
   # config.allowed_environments = [
   #   'development',
