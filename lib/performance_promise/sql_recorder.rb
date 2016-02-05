@@ -19,7 +19,21 @@ class SQLRecorder
 
     sql = payload[:sql]
     cleaned_trace = clean_trace(caller)
-    explained = ActiveRecord::Base.connection.execute("EXPLAIN QUERY PLAN #{sql}", 'SQLR-EXPLAIN')
+    if sql.include?('SELECT')
+      connection = ActiveRecord::Base.connection
+      adapter_name = connection.adapter_name
+      if adapter_name == 'Mysql2'
+        explained = connection.explain(connection, sql).as_json
+      elsif adapter_name == 'SQLite'
+        explained = connection.execute("EXPLAIN QUERY PLAN #{sql}", 'SQLR-EXPLAIN')
+      elsif
+        PerformancePromise.configuration.logger.warn("Unkown database adapter {adapter_name}")
+        explained = connection.execute("EXPLAIN QUERY PLAN #{sql}", 'SQLR-EXPLAIN')
+      end
+    else
+      explained = nil
+    end
+
     @db_queries << {
       :sql => sql,
       :duration => duration,
