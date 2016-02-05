@@ -13,6 +13,10 @@ class SQLRecorder
 
   def record(payload, duration)
     return if invalid_payload?(payload)
+
+    # do not record/analyze explain queries used in dev
+    return if payload[:sql].include?('EXPLAIN')
+
     sql = payload[:sql]
     cleaned_trace = clean_trace(caller)
     explained = ActiveRecord::Base.connection.execute("EXPLAIN QUERY PLAN #{sql}", 'SQLR-EXPLAIN')
