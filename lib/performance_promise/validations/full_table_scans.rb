@@ -53,7 +53,8 @@ module ValidateFullTableScans
     error_message = ''
 
     unless passes
-        error_message = "Promised table scans on #{promised_full_table_scans}, made: #{full_table_scans}"
+        model_names = full_table_scans.map { |table_name| table_name.classify }
+        error_message = ":full_table_scans => [#{model_names.join(', ')}]"
     end
 
     return passes, error_message, backtrace

@@ -81,7 +81,11 @@ module PerformancePromise
 
   def self.validate_promise(method, db_queries, render_time, options)
     return if options[:skip]
+
     promise_broken = false
+    error_messages = []
+    backtraces = []
+
     self.configuration.validations.each do |validation|
       promised = options[validation]
       if promised
@@ -89,22 +93,29 @@ module PerformancePromise
         passed, error_message, backtrace =
           PerformanceValidations.send(validation_method, db_queries, render_time, promised)
         unless passed
-          if PerformancePromise.configuration.throw_exception
-            bp = BrokenPromise.new("Broken promise: #{error_message}")
-            bp.set_backtrace(backtrace)
-            raise bp
-          else
-            PerformancePromise.configuration.logger.warn '-' * 80
-            PerformancePromise.configuration.logger.warn Utils.colored(:red, error_message)
-            backtrace.each do |trace|
-              PerformancePromise.configuration.logger.warn Utils.colored(:cyan, trace)
-            end
-            PerformancePromise.configuration.logger.warn '-' * 80
-          end
+          error_messages << error_message
+          backtraces << '-'*80
+          backtraces << "#{validation.to_s.upcase}"
+          backtraces << backtrace
           promise_broken = true
         end
       end
     end
-    PerformanceValidations.report_promise_passed(method, db_queries, options) unless promise_broken
+    if promise_broken
+      if PerformancePromise.configuration.throw_exception
+        bp = BrokenPromise.new("Try #{error_messages.join(', ')}")
+        bp.set_backtrace(backtraces.flatten)
+        raise bp
+      else
+        PerformancePromise.configuration.logger.warn '-' * 80
+        PerformancePromise.configuration.logger.warn Utils.colored(:red, error_messages.join(', '))
+        backtraces.flatten.each do |trace|
+          PerformancePromise.configuration.logger.warn Utils.colored(:cyan, trace)
+        end
+        PerformancePromise.configuration.logger.warn '-' * 80
+      end
+    else
+      PerformanceValidations.report_promise_passed(method, db_queries, options)
+    end
   end
 end

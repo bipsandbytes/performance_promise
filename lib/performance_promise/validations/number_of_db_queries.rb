@@ -11,7 +11,7 @@ module ValidateNumberOfQueries
     end
 
     guessed_order = Utils.guess_order(db_queries)
-    error_message = "promised #{makes}, made #{db_queries.length} (possibly #{guessed_order})"
+    error_message = ":makes => #{guessed_order}"
     backtrace = []
     Utils.summarize_queries(db_queries).each do |db_query, count|
       statement = "#{count} x #{db_query[:sql]}"
