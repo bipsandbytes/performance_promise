@@ -9,10 +9,11 @@ module Utils
 
   def self.guess_order(db_queries)
     order = []
+    single_queries = 0
     queries_with_count = summarize_queries(db_queries)
     queries_with_count.each do |query, count|
       if count == 1
-        order << "1.query"
+        single_queries += 1
       else
         if (lookup_field = /WHERE .*"(.*?_id)" = \?/.match(query[:sql]))
           klass = lookup_field[1].humanize
@@ -23,6 +24,11 @@ module Utils
       end
     end
 
+    if single_queries == 1
+      order << '1.query'
+    elsif single_queries > 1
+      order << "#{single_queries}.queries"
+    end
     order.join(" + ")
   end
 
