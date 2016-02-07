@@ -102,13 +102,14 @@ module PerformancePromise
       end
     end
     if promise_broken
+      combined_error_message = "#{method}: Try Performance #{error_messages.join(', ')}"
       if PerformancePromise.configuration.throw_exception
-        bp = BrokenPromise.new("Try #{error_messages.join(', ')}")
+        bp = BrokenPromise.new(combined_error_message)
         bp.set_backtrace(backtraces.flatten)
         raise bp
       else
         PerformancePromise.configuration.logger.warn '-' * 80
-        PerformancePromise.configuration.logger.warn Utils.colored(:red, error_messages.join(', '))
+        PerformancePromise.configuration.logger.warn Utils.colored(:red, combined_error_message)
         backtraces.flatten.each do |trace|
           PerformancePromise.configuration.logger.warn Utils.colored(:cyan, trace)
         end
