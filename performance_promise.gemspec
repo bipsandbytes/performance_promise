@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'performance_promise'
-  s.version     = '1.0.1'
+  s.version     = '1.0.2'
   s.date        = '2016-01-11'
   s.summary     = 'Validate your Rails actions\' performance'
   s.description = 'Validate your Rails actions\' performance'
